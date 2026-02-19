@@ -1,0 +1,39 @@
+services:
+  review-bot:
+    build: .
+    container_name: ai-review-responder-bot
+    restart: unless-stopped
+    environment:
+      # Telegram Bot
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+
+      # OpenAI
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5.2}
+      - OPENAI_REASONING_EFFORT=${OPENAI_REASONING_EFFORT:-}
+      - OPENAI_VERBOSITY=${OPENAI_VERBOSITY:-}
+
+      # Google Play Developer API
+      - GOOGLE_PLAY_KEY_FILE=./credentials/service-account.json
+
+      # App Store Connect API
+      - APP_STORE_KEY_ID=${APP_STORE_KEY_ID:-}
+      - APP_STORE_ISSUER_ID=${APP_STORE_ISSUER_ID:-}
+      - APP_STORE_PRIVATE_KEY_FILE=./credentials/AuthKey.p8
+
+      # Polling
+      - POLLING_INTERVAL_MINUTES=${POLLING_INTERVAL_MINUTES:-30}
+
+      # Preferred language for translations shown in Telegram
+      - PREFERRED_LANGUAGE=${PREFERRED_LANGUAGE:-en}
+
+      # Database (inside the container — persisted via volume)
+      - DATABASE_PATH=./data/reviews.db
+    volumes:
+      - ./config:/app/config:ro
+      - ./credentials:/app/credentials:ro
+      - review-bot-data:/app/data
+
+volumes:
+  review-bot-data:

@@ -1,0 +1,20 @@
+[
+  {
+    "name": "My Android App",
+    "platform": "google_play",
+    "id": "com.example.myapp",
+    "replyContext": "A fitness tracking app that helps users log workouts and track progress."
+  },
+  {
+    "name": "My iOS App",
+    "platform": "app_store",
+    "id": "1234567890",
+    "replyContext": "./config/my-ios-app-context.md"
+  },
+  {
+    "name": "My Test App",
+    "platform": "mock",
+    "id": "com.example.testapp",
+    "replyContext": "A test app for trying out the review responder bot."
+  }
+]
