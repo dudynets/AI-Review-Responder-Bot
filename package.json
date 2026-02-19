@@ -1,6 +1,6 @@
 {
   "name": "ai-review-responder-bot",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Telegram bot that fetches app reviews from Google Play and App Store, generates AI replies, and lets you respond with one click.",
   "type": "module",
   "main": "src/index.ts",
