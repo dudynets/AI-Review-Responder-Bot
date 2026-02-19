@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import {bot} from './bot/bot.js';
 import {registerCommands} from './bot/commands.js';
 import {registerCallbacks} from './bot/callbacks.js';

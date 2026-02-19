@@ -1,7 +1,7 @@
 import {mkdirSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
-import {Database} from 'bun:sqlite';
-import {drizzle} from 'drizzle-orm/bun-sqlite';
+import Database from 'better-sqlite3';
+import {drizzle} from 'drizzle-orm/better-sqlite3';
 import {env} from '../config.js';
 import * as schema from './schema.js';
 import {logger} from '../utils/logger.js';
@@ -10,11 +10,11 @@ const dbPath = resolve(env.DATABASE_PATH);
 mkdirSync(dirname(dbPath), {recursive: true});
 
 const sqlite = new Database(dbPath);
-sqlite.run('PRAGMA journal_mode = WAL');
+sqlite.pragma('journal_mode = WAL');
 
 export const db = drizzle(sqlite, {schema});
 
-sqlite.run(`
+sqlite.exec(`
   CREATE TABLE IF NOT EXISTS reviews (
     id              TEXT PRIMARY KEY,
     platform        TEXT NOT NULL,

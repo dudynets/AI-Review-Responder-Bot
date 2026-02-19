@@ -1,25 +1,22 @@
-FROM oven/bun:1 AS builder
+# ── Install dependencies and rebuild native modules ──────────────────────────
+
+FROM imbios/bun-node:1-22-debian AS deps
 
 WORKDIR /app
 
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --production && npm rebuild better-sqlite3
 
+# ── Production stage ─────────────────────────────────────────────────────────
+
+FROM node:22-slim
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json ./
 COPY tsconfig.json ./
 COPY src ./src
-COPY drizzle.config.ts ./
-
-# ── Production stage ────────────────────────────────────────────────────────
-
-FROM oven/bun:1-slim
-
-WORKDIR /app
-
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production
-
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/tsconfig.json ./
 
 # The container expects these to be mounted at runtime:
 #   /app/config/apps.json      – app configuration
@@ -28,4 +25,4 @@ COPY --from=builder /app/tsconfig.json ./
 
 VOLUME ["/app/data"]
 
-CMD ["bun", "src/index.ts"]
+CMD ["node", "--import", "tsx", "src/index.ts"]

@@ -22,7 +22,8 @@
 
 ## Prerequisites
 
-- **Bun** >= 1.0
+- **Node.js** >= 22
+- **Bun** >= 1.0 _(used as package manager only)_
 - A **Telegram bot** created via [@BotFather](https://t.me/BotFather)
 - An **OpenAI API key**
 - **Google Play** service account credentials (if monitoring Android apps)
