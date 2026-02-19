@@ -91,7 +91,7 @@ Edit `.env` with your values:
 | `OPENAI_MODEL`               | OpenAI model to use                                                                                   | `gpt-5.2`                            |
 | `OPENAI_REASONING_EFFORT`    | Reasoning effort for supported models: `none`, `low`, `medium`, `high`, `xhigh`. Leave empty to omit. | _(empty)_                            |
 | `OPENAI_VERBOSITY`           | Verbosity for supported models: `low`, `medium`, `high`. Leave empty to omit.                         | _(empty)_                            |
-| `GOOGLE_PLAY_KEY_FILE`       | Path to the Google Play service account JSON key                                                      | `./credentials/service-account.json` |
+| `GOOGLE_PLAY_KEY_FILE`       | Path to the Google Play service account JSON key file                                                 | `./credentials/service-account.json` |
 | `APP_STORE_KEY_ID`           | App Store Connect API Key ID                                                                          | _(required if using App Store)_      |
 | `APP_STORE_ISSUER_ID`        | App Store Connect Issuer ID                                                                           | _(required if using App Store)_      |
 | `APP_STORE_PRIVATE_KEY_FILE` | Path to the `.p8` private key file                                                                    | `./credentials/AuthKey.p8`           |
@@ -192,13 +192,88 @@ To modify a generated reply before sending:
 
 ## Docker
 
-### Build and run
+A pre-built Docker image is published to GitHub Container Registry on every push to `main`.
+
+```
+ghcr.io/dudynets/ai-review-responder-bot:latest
+```
+
+### Portainer stack
+
+In Portainer, go to **Stacks > Add stack**, select **Web editor**, paste the following compose file, fill in the environment variables, and click **Deploy the stack**.
+
+```yaml
+services:
+  review-bot:
+    image: ghcr.io/dudynets/ai-review-responder-bot:latest
+    container_name: ai-review-responder-bot
+    restart: unless-stopped
+    environment:
+      # Telegram Bot
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+
+      # OpenAI
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5.2}
+      - OPENAI_REASONING_EFFORT=${OPENAI_REASONING_EFFORT:-}
+      - OPENAI_VERBOSITY=${OPENAI_VERBOSITY:-}
+
+      # Google Play Developer API
+      - GOOGLE_PLAY_KEY_FILE=./credentials/service-account.json
+
+      # App Store Connect API
+      - APP_STORE_KEY_ID=${APP_STORE_KEY_ID:-}
+      - APP_STORE_ISSUER_ID=${APP_STORE_ISSUER_ID:-}
+      - APP_STORE_PRIVATE_KEY_FILE=./credentials/AuthKey.p8
+
+      # Polling
+      - POLLING_INTERVAL_MINUTES=${POLLING_INTERVAL_MINUTES:-30}
+
+      # Preferred language for translations shown in Telegram
+      - PREFERRED_LANGUAGE=${PREFERRED_LANGUAGE:-en}
+
+      # Database (inside the container — persisted via volume)
+      - DATABASE_PATH=./data/reviews.db
+    volumes:
+      - /path/on/host/config:/app/config:ro
+      - /path/on/host/credentials:/app/credentials:ro
+      - review-bot-data:/app/data
+
+volumes:
+  review-bot-data:
+```
+
+Replace `/path/on/host/config` and `/path/on/host/credentials` with absolute paths on your server where you have placed the following files:
+
+| Path on host              | Contents                                                          |
+| ------------------------- | ----------------------------------------------------------------- |
+| `config/apps.json`        | App configuration (see `config/apps.example.json` for the format) |
+| `credentials/`            | Service account JSON and/or `.p8` key file                        |
+
+Add the following environment variables in Portainer's **Environment variables** section:
+
+| Variable                   | Required                 |
+| -------------------------- | ------------------------ |
+| `TELEGRAM_BOT_TOKEN`       | Yes                      |
+| `TELEGRAM_CHAT_ID`         | Yes                      |
+| `OPENAI_API_KEY`           | Yes                      |
+| `OPENAI_MODEL`             | No (default: `gpt-5.2`)  |
+| `OPENAI_REASONING_EFFORT`  | No                       |
+| `OPENAI_VERBOSITY`         | No                       |
+| `APP_STORE_KEY_ID`         | If using App Store       |
+| `APP_STORE_ISSUER_ID`      | If using App Store       |
+| `POLLING_INTERVAL_MINUTES` | No (default: `30`)       |
+| `PREFERRED_LANGUAGE`       | No (default: `en`)       |
+
+The image is updated automatically on every push to `main`. To update, click **Pull and redeploy** in Portainer. The SQLite database is stored in a named Docker volume (`review-bot-data`) and persists across redeployments.
+
+### Manual Docker run
+
+To build and run locally:
 
 ```bash
 docker build -t ai-review-responder-bot .
-```
-
-```bash
 docker run -d \
   --name review-bot \
   --restart unless-stopped \
@@ -208,49 +283,6 @@ docker run -d \
   -v ./data:/app/data \
   ai-review-responder-bot
 ```
-
-| Mount                            | Purpose                                | Mode |
-| -------------------------------- | -------------------------------------- | ---- |
-| `./config:/app/config`           | `apps.json` and optional context files | ro   |
-| `./credentials:/app/credentials` | Service account / `.p8` key files      | ro   |
-| `./data:/app/data`               | SQLite database                        | rw   |
-
-### Docker Compose
-
-A `docker-compose.yml` is included. It reads configuration from environment variables (or a `.env` file in the same directory).
-
-```bash
-docker compose up -d
-```
-
-### Portainer deployment
-
-1. Push the repository to a Git remote accessible from your server.
-2. In Portainer, go to **Stacks > Add stack** and select **Repository**.
-3. Fill in the repository URL, branch (`refs/heads/main`), and compose path (`docker-compose.yml`).
-4. Add the required environment variables under **Environment variables**:
-
-| Variable                   | Required                |
-| -------------------------- | ----------------------- |
-| `TELEGRAM_BOT_TOKEN`       | Yes                     |
-| `TELEGRAM_CHAT_ID`         | Yes                     |
-| `OPENAI_API_KEY`           | Yes                     |
-| `OPENAI_MODEL`             | No (default: `gpt-5.2`) |
-| `OPENAI_REASONING_EFFORT`  | No                      |
-| `OPENAI_VERBOSITY`         | No                      |
-| `APP_STORE_KEY_ID`         | If using App Store      |
-| `APP_STORE_ISSUER_ID`      | If using App Store      |
-| `POLLING_INTERVAL_MINUTES` | No (default: `30`)      |
-| `PREFERRED_LANGUAGE`       | No (default: `en`)      |
-
-1. Ensure `config/apps.json` and `credentials/` are available on the server. Either:
-
-- **Commit them** to a private repository, or
-- **Bind mount from the host** by overriding the volume paths in the compose file to absolute paths on your server.
-
-1. Click **Deploy the stack**.
-
-The SQLite database is stored in a named Docker volume (`review-bot-data`) and persists across redeployments. To update after pushing new code, click **Pull and redeploy** in Portainer.
 
 ## API rate limits
 

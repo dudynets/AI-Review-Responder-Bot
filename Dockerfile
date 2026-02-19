@@ -22,10 +22,9 @@ COPY --from=builder /app/src ./src
 COPY --from=builder /app/tsconfig.json ./
 
 # The container expects these to be mounted at runtime:
-#   /app/config/apps.json          – app configuration
-#   /app/credentials/              – service account / p8 keys
-#   /app/data/                     – SQLite database (persistent volume)
-#   /app/.env                      – environment variables (or use env flags)
+#   /app/config/apps.json      – app configuration
+#   /app/credentials/          – service account / p8 key files
+#   /app/data/                 – SQLite database (persistent volume)
 
 VOLUME ["/app/data"]
 
