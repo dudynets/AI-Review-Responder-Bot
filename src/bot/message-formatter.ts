@@ -3,7 +3,7 @@ import type {ReviewRow} from '../db/schema.js';
 import {preferredLanguageName} from '../config.js';
 
 function renderStars(rating: number): string {
-  return '\u2b50'.repeat(rating);
+  return '⭐'.repeat(rating);
 }
 
 function escapeHtml(text: string): string {
@@ -33,25 +33,25 @@ export function formatReviewMessage(review: ReviewRow): string {
   msg += `<i>${escapeHtml(review.originalText)}</i>\n`;
 
   if (review.translatedText) {
-    msg += `\n<b>Translation (${preferredLanguageName}):</b>\n`;
-    msg += `${escapeHtml(review.translatedText)}\n`;
+    msg += `\n<b>Review in ${preferredLanguageName}:</b>\n`;
+    msg += `<i>${escapeHtml(review.translatedText)}</i>\n`;
   }
 
   if (review.generatedReply) {
-    msg += `\n${'─'.repeat(3)}\n\n`;
-    msg += `<b>AI Generated Reply:</b>\n`;
+    msg += `\n${'-'.repeat(3)}\n\n`;
+    msg += `<b>Reply:</b>\n`;
     msg += `<i>${escapeHtml(review.generatedReply)}</i>\n`;
 
     if (
       review.replyTranslated &&
       review.replyTranslated !== review.generatedReply
     ) {
-      msg += `\n<b>Reply (${preferredLanguageName}):</b>\n`;
-      msg += `${escapeHtml(review.replyTranslated)}\n`;
+      msg += `\n<b>Reply in ${preferredLanguageName}:</b>\n`;
+      msg += `<i>${escapeHtml(review.replyTranslated)}</i>\n`;
     }
   }
 
-  msg += `\n<i>Reply to this message with comments to adjust the reply.</i>`;
+  msg += `\nReply to this message with comments to adjust the reply.`;
 
   return msg;
 }
@@ -70,30 +70,30 @@ export function formatRepliedMessage(review: ReviewRow): string {
   msg += `<i>${escapeHtml(review.originalText)}</i>\n`;
 
   if (review.translatedText) {
-    msg += `\n<b>Translation (${preferredLanguageName}):</b>\n`;
-    msg += `${escapeHtml(review.translatedText)}\n`;
+    msg += `\n<b>Review in ${preferredLanguageName}:</b>\n`;
+    msg += `<i>${escapeHtml(review.translatedText)}</i>\n`;
   }
 
-  msg += `\n${'─'.repeat(3)}\n\n`;
+  msg += `\n${'-'.repeat(3)}\n\n`;
 
-  msg += `<b>Sent Reply:</b>\n`;
+  msg += `<b>Reply:</b>\n`;
   msg += `<i>${escapeHtml(review.generatedReply ?? '')}</i>\n`;
 
   if (
     review.replyTranslated &&
     review.replyTranslated !== review.generatedReply
   ) {
-    msg += `\n<b>Reply (${preferredLanguageName}):</b>\n`;
-    msg += `${escapeHtml(review.replyTranslated ?? '')}\n`;
+    msg += `\n<b>Reply in ${preferredLanguageName}:</b>\n`;
+    msg += `<i>${escapeHtml(review.replyTranslated ?? '')}</i>\n`;
   }
 
-  msg += `\n\u2705 <b>Reply sent successfully!</b>`;
+  msg += `\n✅ Reply sent successfully!`;
 
   return msg;
 }
 
 export function buildReviewKeyboard(reviewDbId: string): InlineKeyboard {
   return new InlineKeyboard()
-    .text('\u2705 Send Reply', `reply:${reviewDbId}`)
-    .text('\u274c Skip', `skip:${reviewDbId}`);
+    .text('✅ Send Reply', `reply:${reviewDbId}`)
+    .text('❌ Skip', `skip:${reviewDbId}`);
 }

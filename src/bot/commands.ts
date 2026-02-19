@@ -11,8 +11,8 @@ export function registerCommands(bot: Bot, checkFn: () => Promise<void>): void {
         "I fetch reviews from Google Play and App Store that don't have a developer response, " +
         'generate AI-powered replies, and let you send them with one tap.\n\n' +
         '<b>Commands:</b>\n' +
-        '/check \u2014 Check for new reviews now\n' +
-        '/help \u2014 Show this help message\n\n' +
+        '/check - Check for new reviews now\n' +
+        '/help - Show this help message\n\n' +
         '<b>How to use:</b>\n' +
         "1. I'll send you new reviews as they come in.\n" +
         '2. Tap <b>Send Reply</b> to submit the AI reply to the store.\n' +
@@ -27,8 +27,8 @@ export function registerCommands(bot: Bot, checkFn: () => Promise<void>): void {
 
     await ctx.reply(
       '<b>Commands:</b>\n' +
-        '/check \u2014 Check for new reviews now\n' +
-        '/help \u2014 Show this message\n\n' +
+        '/check - Check for new reviews now\n' +
+        '/help - Show this message\n\n' +
         '<b>Adjusting replies:</b>\n' +
         'Reply to any review message with your comments (e.g. "make it shorter", ' +
         '"mention we\'re working on a fix") and I\'ll regenerate the reply.\n\n' +
@@ -41,15 +41,12 @@ export function registerCommands(bot: Bot, checkFn: () => Promise<void>): void {
   bot.command('check', async (ctx: Context) => {
     if (!isAuthorized(ctx)) return;
 
-    await ctx.reply('\u{1f50d} Checking for new reviews...');
+    await ctx.reply('🔍 Checking for new reviews...');
     try {
       await checkFn();
-      await ctx.reply('\u2705 Review check complete.');
     } catch (error) {
       logger.error({error}, 'Error during manual review check');
-      await ctx.reply(
-        '\u274c Error checking reviews. Check the logs for details.',
-      );
+      await ctx.reply('❌ Error checking reviews. Check the logs for details');
     }
   });
 }

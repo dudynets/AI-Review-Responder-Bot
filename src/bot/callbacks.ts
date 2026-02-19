@@ -27,21 +27,21 @@ export function registerCallbacks(bot: Bot): void {
       const review = findReviewById(reviewDbId);
       if (!review) {
         await ctx.answerCallbackQuery({
-          text: 'Review not found in database.',
+          text: 'Review not found in database',
         });
         return;
       }
 
       if (review.status === 'replied') {
         await ctx.answerCallbackQuery({
-          text: 'Already replied to this review.',
+          text: 'Already replied to this review',
         });
         return;
       }
 
       if (!review.generatedReply) {
         await ctx.answerCallbackQuery({
-          text: 'No generated reply available.',
+          text: 'No generated reply available',
         });
         return;
       }
@@ -72,7 +72,7 @@ export function registerCallbacks(bot: Bot): void {
     } catch (error) {
       logger.error({error, reviewDbId}, 'Failed to submit reply');
       await ctx.answerCallbackQuery({
-        text: 'Failed to send reply. Check logs.',
+        text: 'Failed to send reply. Check logs',
         show_alert: true,
       });
     }
@@ -85,7 +85,7 @@ export function registerCallbacks(bot: Bot): void {
     try {
       const review = findReviewById(reviewDbId);
       if (!review) {
-        await ctx.answerCallbackQuery({text: 'Review not found.'});
+        await ctx.answerCallbackQuery({text: 'Review not found'});
         return;
       }
 
@@ -93,16 +93,16 @@ export function registerCallbacks(bot: Bot): void {
 
       await ctx.editMessageText(
         ctx.callbackQuery?.message?.text
-          ? ctx.callbackQuery.message.text + '\n\n\u23ed Skipped.'
-          : '\u23ed Skipped.',
+          ? ctx.callbackQuery.message.text + '\n\n❌ Skipped'
+          : '❌ Skipped',
         {reply_markup: undefined},
       );
 
-      await ctx.answerCallbackQuery({text: 'Review skipped.'});
+      await ctx.answerCallbackQuery({text: 'Review skipped'});
     } catch (error) {
       logger.error({error, reviewDbId}, 'Failed to skip review');
       await ctx.answerCallbackQuery({
-        text: 'Error skipping review.',
+        text: 'Error skipping review',
         show_alert: true,
       });
     }

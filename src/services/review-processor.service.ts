@@ -38,7 +38,7 @@ export async function processAllApps(bot: Bot): Promise<void> {
       if (app.platform === Platform.GOOGLE_PLAY && !isGooglePlayConfigured()) {
         logger.warn(
           {app: app.name},
-          'Skipping Google Play app \u2014 service account not configured',
+          'Skipping Google Play app - service account not configured',
         );
         continue;
       }
@@ -46,7 +46,7 @@ export async function processAllApps(bot: Bot): Promise<void> {
       if (app.platform === Platform.APP_STORE && !isAppStoreConfigured()) {
         logger.warn(
           {app: app.name},
-          'Skipping App Store app \u2014 API key not configured',
+          'Skipping App Store app - API key not configured',
         );
         continue;
       }

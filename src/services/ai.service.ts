@@ -128,7 +128,7 @@ RULES:
 5. For negative reviews: apologize for the bad experience, acknowledge the issue, and mention that feedback is being considered.
 6. Do NOT promise specific features or timelines.
 7. Keep the reply under ${charLimit} characters (this is a hard platform limit).
-8. Do NOT include any greeting like "Dear user" — be concise and direct.
+8. Do NOT include any greeting like "Dear user" - be concise and direct.
 
 OUTPUT FORMAT:
 Respond with a JSON object containing exactly two fields:

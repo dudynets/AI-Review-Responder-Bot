@@ -17,30 +17,11 @@ interface ASCReview {
     createdDate: string;
     territory: string;
   };
-  relationships?: {
-    response?: {
-      links?: {
-        related?: string;
-      };
-      data?: {type: string; id: string} | null;
-    };
-  };
 }
 
 interface ASCReviewsResponse {
   data: ASCReview[];
-  included?: ASCReviewResponse[];
   links?: {next?: string};
-}
-
-interface ASCReviewResponse {
-  type: 'customerReviewResponses';
-  id: string;
-  attributes: {
-    responseBody: string;
-    lastModifiedDate: string;
-    state: string;
-  };
 }
 
 export class AppStoreAdapter implements PlatformAdapter {

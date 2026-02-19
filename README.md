@@ -172,8 +172,8 @@ Once running, the bot will:
 
 Each message includes two buttons:
 
-- **Send Reply** — publishes the reply to the store.
-- **Skip** — marks the review as skipped (it will not appear again).
+- **Send Reply** - publishes the reply to the store.
+- **Skip** - marks the review as skipped (it will not appear again).
 
 ### Commands
 
@@ -234,7 +234,7 @@ services:
       # Preferred language for translations shown in Telegram
       - PREFERRED_LANGUAGE=${PREFERRED_LANGUAGE:-en}
 
-      # Database (inside the container — persisted via volume)
+      # Database (inside the container - persisted via volume)
       - DATABASE_PATH=./data/reviews.db
     volumes:
       - /path/on/host/config:/app/config:ro
@@ -247,25 +247,25 @@ volumes:
 
 Replace `/path/on/host/config` and `/path/on/host/credentials` with absolute paths on your server where you have placed the following files:
 
-| Path on host              | Contents                                                          |
-| ------------------------- | ----------------------------------------------------------------- |
-| `config/apps.json`        | App configuration (see `config/apps.example.json` for the format) |
-| `credentials/`            | Service account JSON and/or `.p8` key file                        |
+| Path on host       | Contents                                                          |
+| ------------------ | ----------------------------------------------------------------- |
+| `config/apps.json` | App configuration (see `config/apps.example.json` for the format) |
+| `credentials/`     | Service account JSON and/or `.p8` key file                        |
 
 Add the following environment variables in Portainer's **Environment variables** section:
 
-| Variable                   | Required                 |
-| -------------------------- | ------------------------ |
-| `TELEGRAM_BOT_TOKEN`       | Yes                      |
-| `TELEGRAM_CHAT_ID`         | Yes                      |
-| `OPENAI_API_KEY`           | Yes                      |
-| `OPENAI_MODEL`             | No (default: `gpt-5.2`)  |
-| `OPENAI_REASONING_EFFORT`  | No                       |
-| `OPENAI_VERBOSITY`         | No                       |
-| `APP_STORE_KEY_ID`         | If using App Store       |
-| `APP_STORE_ISSUER_ID`      | If using App Store       |
-| `POLLING_INTERVAL_MINUTES` | No (default: `30`)       |
-| `PREFERRED_LANGUAGE`       | No (default: `en`)       |
+| Variable                   | Required                |
+| -------------------------- | ----------------------- |
+| `TELEGRAM_BOT_TOKEN`       | Yes                     |
+| `TELEGRAM_CHAT_ID`         | Yes                     |
+| `OPENAI_API_KEY`           | Yes                     |
+| `OPENAI_MODEL`             | No (default: `gpt-5.2`) |
+| `OPENAI_REASONING_EFFORT`  | No                      |
+| `OPENAI_VERBOSITY`         | No                      |
+| `APP_STORE_KEY_ID`         | If using App Store      |
+| `APP_STORE_ISSUER_ID`      | If using App Store      |
+| `POLLING_INTERVAL_MINUTES` | No (default: `30`)      |
+| `PREFERRED_LANGUAGE`       | No (default: `en`)      |
 
 The image is updated automatically on every push to `main`. To update, click **Pull and redeploy** in Portainer. The SQLite database is stored in a named Docker volume (`review-bot-data`) and persists across redeployments.
 

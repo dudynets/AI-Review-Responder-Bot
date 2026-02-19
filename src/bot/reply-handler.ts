@@ -22,7 +22,7 @@ export function registerReplyHandler(bot: Bot): void {
     if (!review) return;
 
     if (review.status === 'replied') {
-      await ctx.reply('This review has already been replied to.', {
+      await ctx.reply('This review has already been replied to', {
         reply_to_message_id: ctx.message?.message_id,
       });
       return;
@@ -34,7 +34,7 @@ export function registerReplyHandler(bot: Bot): void {
     );
 
     try {
-      await ctx.reply('\u{1f504} Regenerating reply...', {
+      await ctx.reply('🔄 Regenerating reply...', {
         reply_to_message_id: ctx.message?.message_id,
       });
 
@@ -66,7 +66,7 @@ export function registerReplyHandler(bot: Bot): void {
         reply_markup: keyboard,
       });
 
-      await ctx.reply('\u2705 Reply updated!', {
+      await ctx.reply('✅ Reply updated!', {
         reply_to_message_id: ctx.message?.message_id,
       });
 
@@ -76,10 +76,9 @@ export function registerReplyHandler(bot: Bot): void {
       );
     } catch (error) {
       logger.error({error, reviewId: review.id}, 'Failed to regenerate reply');
-      await ctx.reply(
-        '\u274c Failed to regenerate reply. Check logs for details.',
-        {reply_to_message_id: ctx.message?.message_id},
-      );
+      await ctx.reply('❌ Failed to regenerate reply. Check logs for details', {
+        reply_to_message_id: ctx.message?.message_id,
+      });
     }
   });
 }
