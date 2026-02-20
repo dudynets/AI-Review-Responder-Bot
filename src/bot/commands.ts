@@ -2,7 +2,10 @@ import type {Bot, Context} from 'grammy';
 import {env} from '../config.js';
 import {logger} from '../utils/logger.js';
 
-export function registerCommands(bot: Bot, checkFn: () => Promise<void>): void {
+export function registerCommands(
+  bot: Bot,
+  checkFn: () => Promise<number>,
+): void {
   bot.command('start', async (ctx: Context) => {
     if (!isAuthorized(ctx)) return;
 
@@ -43,7 +46,15 @@ export function registerCommands(bot: Bot, checkFn: () => Promise<void>): void {
 
     await ctx.reply('🔍 Checking for new reviews...');
     try {
-      await checkFn();
+      const count = await checkFn();
+
+      if (count > 0) {
+        await ctx.reply(
+          `✅ Found ${count} new ${count === 1 ? 'review' : 'reviews'}`,
+        );
+      } else {
+        await ctx.reply('No new reviews found');
+      }
     } catch (error) {
       logger.error({error}, 'Error during manual review check');
       await ctx.reply('❌ Error checking reviews. Check the logs for details');

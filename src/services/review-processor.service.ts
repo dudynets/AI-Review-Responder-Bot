@@ -30,8 +30,9 @@ const adapters: Record<Platform, PlatformAdapter> = {
   mock: new MockAdapter(),
 };
 
-export async function processAllApps(bot: Bot): Promise<void> {
+export async function processAllApps(bot: Bot): Promise<number> {
   logger.info('Starting review check for all apps');
+  let newCount = 0;
 
   for (const app of apps) {
     try {
@@ -51,7 +52,13 @@ export async function processAllApps(bot: Bot): Promise<void> {
         continue;
       }
 
-      await processApp(bot, app.platform, app.id, app.name, app.replyContext);
+      newCount += await processApp(
+        bot,
+        app.platform,
+        app.id,
+        app.name,
+        app.replyContext,
+      );
     } catch (error) {
       logger.error(
         {error, app: app.name, platform: app.platform},
@@ -60,7 +67,8 @@ export async function processAllApps(bot: Bot): Promise<void> {
     }
   }
 
-  logger.info('Review check complete');
+  logger.info({newCount}, 'Review check complete');
+  return newCount;
 }
 
 async function processApp(
@@ -69,7 +77,7 @@ async function processApp(
   appId: string,
   appName: string,
   appContext: string,
-): Promise<void> {
+): Promise<number> {
   const adapter = adapters[platform];
   const reviews = await adapter.fetchUnrespondedReviews(appId, appName);
   let newCount = 0;
@@ -95,6 +103,8 @@ async function processApp(
   if (newCount > 0) {
     logger.info({appName, platform, newCount}, 'Processed new reviews');
   }
+
+  return newCount;
 }
 
 async function processReview(
