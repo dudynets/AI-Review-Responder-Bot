@@ -31,8 +31,9 @@ export interface NormalizedReview {
 }
 
 export interface StoredReview extends NormalizedReview {
+  id: number;
   /** Composite key: "{platform}:{appId}:{reviewId}" */
-  id: string;
+  compositeKey: string;
   generatedReply: string | null;
   replyTranslated: string | null;
   telegramMsgId: number | null;

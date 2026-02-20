@@ -16,7 +16,8 @@ export const db = drizzle(sqlite, {schema});
 
 sqlite.exec(`
   CREATE TABLE IF NOT EXISTS reviews (
-    id              TEXT PRIMARY KEY,
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    composite_key   TEXT NOT NULL UNIQUE,
     platform        TEXT NOT NULL,
     app_id          TEXT NOT NULL,
     app_name        TEXT NOT NULL,

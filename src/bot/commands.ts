@@ -10,18 +10,18 @@ export function registerCommands(
     if (!isAuthorized(ctx)) return;
 
     await ctx.reply(
-      '<b>AI Review Responder Bot</b>\n\n' +
+      '*AI Review Responder Bot*\n\n' +
         "I fetch reviews from Google Play and App Store that don't have a developer response, " +
-        'generate AI-powered replies, and let you send them with one tap.\n\n' +
-        '<b>Commands:</b>\n' +
-        '/check - Check for new reviews now\n' +
-        '/help - Show this help message\n\n' +
-        '<b>How to use:</b>\n' +
-        "1. I'll send you new reviews as they come in.\n" +
-        '2. Tap <b>Send Reply</b> to submit the AI reply to the store.\n' +
-        '3. Reply to any review message with comments to adjust the AI reply.\n' +
-        "4. Tap <b>Skip</b> if you don't want to reply.",
-      {parse_mode: 'HTML'},
+        'generate AI\\-powered replies, and let you send them with one tap\\.\n\n' +
+        '*Commands:*\n' +
+        '/check \\- Check for new reviews now\n' +
+        '/help \\- Show this help message\n\n' +
+        '*How to use:*\n' +
+        "1\\. I'll send you new reviews as they come in\\.\n" +
+        '2\\. Tap *Send Reply* to submit the AI reply to the store\\.\n' +
+        '3\\. Reply to any review message with comments to adjust the AI reply\\.\n' +
+        "4\\. Tap *Skip* if you don't want to reply\\.",
+      {parse_mode: 'MarkdownV2'},
     );
   });
 
@@ -29,15 +29,15 @@ export function registerCommands(
     if (!isAuthorized(ctx)) return;
 
     await ctx.reply(
-      '<b>Commands:</b>\n' +
-        '/check - Check for new reviews now\n' +
-        '/help - Show this message\n\n' +
-        '<b>Adjusting replies:</b>\n' +
-        'Reply to any review message with your comments (e.g. "make it shorter", ' +
-        '"mention we\'re working on a fix") and I\'ll regenerate the reply.\n\n' +
-        '<b>Polling:</b>\n' +
-        `Reviews are automatically checked every ${env.POLLING_INTERVAL_MINUTES} minutes.`,
-      {parse_mode: 'HTML'},
+      '*Commands:*\n' +
+        '/check \\- Check for new reviews now\n' +
+        '/help \\- Show this message\n\n' +
+        '*Adjusting replies:*\n' +
+        'Reply to any review message with your comments \\(e\\.g\\. "make it shorter", ' +
+        '"mention we\'re working on a fix"\\) and I\'ll regenerate the reply\\.\n\n' +
+        '*Polling:*\n' +
+        `Reviews are automatically checked every ${env.POLLING_INTERVAL_MINUTES} minutes\\.`,
+      {parse_mode: 'MarkdownV2'},
     );
   });
 

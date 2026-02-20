@@ -2,7 +2,7 @@ import {eq, and} from 'drizzle-orm';
 import {db} from './connection.js';
 import {reviews, type ReviewRow, type NewReviewRow} from './schema.js';
 
-export function makeReviewId(
+export function makeCompositeKey(
   platform: string,
   appId: string,
   reviewId: string,
@@ -10,8 +10,18 @@ export function makeReviewId(
   return `${platform}:${appId}:${reviewId}`;
 }
 
-export function findReviewById(id: string): ReviewRow | undefined {
+export function findReviewById(id: number): ReviewRow | undefined {
   return db.select().from(reviews).where(eq(reviews.id, id)).get();
+}
+
+export function findReviewByCompositeKey(
+  compositeKey: string,
+): ReviewRow | undefined {
+  return db
+    .select()
+    .from(reviews)
+    .where(eq(reviews.compositeKey, compositeKey))
+    .get();
 }
 
 export function findReviewByTelegramMsg(
@@ -27,16 +37,16 @@ export function findReviewByTelegramMsg(
     .get();
 }
 
-export function reviewExists(id: string): boolean {
-  return findReviewById(id) !== undefined;
+export function reviewExists(compositeKey: string): boolean {
+  return findReviewByCompositeKey(compositeKey) !== undefined;
 }
 
-export function insertReview(data: NewReviewRow): void {
-  db.insert(reviews).values(data).run();
+export function insertReview(data: NewReviewRow): ReviewRow {
+  return db.insert(reviews).values(data).returning().get();
 }
 
 export function updateReviewReply(
-  id: string,
+  id: number,
   generatedReply: string,
   replyTranslated: string,
 ): void {
@@ -51,7 +61,7 @@ export function updateReviewReply(
 }
 
 export function updateReviewTelegramMsg(
-  id: string,
+  id: number,
   telegramMsgId: number,
   telegramChatId: string,
 ): void {
@@ -65,7 +75,7 @@ export function updateReviewTelegramMsg(
     .run();
 }
 
-export function markReviewReplied(id: string): void {
+export function markReviewReplied(id: number): void {
   db.update(reviews)
     .set({
       status: 'replied',
@@ -75,7 +85,7 @@ export function markReviewReplied(id: string): void {
     .run();
 }
 
-export function markReviewSkipped(id: string): void {
+export function markReviewSkipped(id: number): void {
   db.update(reviews)
     .set({
       status: 'skipped',

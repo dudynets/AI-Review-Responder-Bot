@@ -13,10 +13,9 @@ import {AppStoreAdapter} from '../platforms/app-store.adapter.js';
 import {MockAdapter} from '../platforms/mock.adapter.js';
 import {generateReply, translateText} from './ai.service.js';
 import {
-  makeReviewId,
+  makeCompositeKey,
   reviewExists,
   insertReview,
-  findReviewById,
   updateReviewTelegramMsg,
 } from '../db/review.repository.js';
 import {
@@ -83,11 +82,11 @@ async function processApp(
   let newCount = 0;
 
   for (const review of reviews) {
-    const dbId = makeReviewId(platform, appId, review.reviewId);
-    if (reviewExists(dbId)) continue;
+    const compositeKey = makeCompositeKey(platform, appId, review.reviewId);
+    if (reviewExists(compositeKey)) continue;
 
     try {
-      await processReview(bot, review, dbId, appContext);
+      await processReview(bot, review, compositeKey, appContext);
       newCount++;
     } catch (error) {
       logger.error(
@@ -110,7 +109,7 @@ async function processApp(
 async function processReview(
   bot: Bot,
   review: NormalizedReview,
-  dbId: string,
+  compositeKey: string,
   appContext: string,
 ): Promise<void> {
   const translatedText = await translateText(
@@ -131,8 +130,8 @@ async function processReview(
     appContext,
   );
 
-  insertReview({
-    id: dbId,
+  const storedReview = insertReview({
+    compositeKey,
     platform: review.platform,
     appId: review.appId,
     appName: review.appName,
@@ -148,20 +147,19 @@ async function processReview(
     status: 'pending',
   });
 
-  const storedReview = findReviewById(dbId);
-  if (!storedReview) {
-    throw new Error(`Failed to read back review ${dbId} after insert`);
-  }
-
   const messageText = formatReviewMessage(storedReview);
-  const keyboard = buildReviewKeyboard(dbId);
+  const keyboard = buildReviewKeyboard(storedReview.id);
 
   const sent = await bot.api.sendMessage(env.TELEGRAM_CHAT_ID, messageText, {
-    parse_mode: 'HTML',
+    parse_mode: 'MarkdownV2',
     reply_markup: keyboard,
   });
 
-  updateReviewTelegramMsg(dbId, sent.message_id, env.TELEGRAM_CHAT_ID);
+  updateReviewTelegramMsg(
+    storedReview.id,
+    sent.message_id,
+    env.TELEGRAM_CHAT_ID,
+  );
 
   logger.info(
     {

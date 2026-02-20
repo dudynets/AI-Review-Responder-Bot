@@ -127,7 +127,7 @@ RULES:
 4. For positive reviews: thank the user sincerely without being sycophantic.
 5. For negative reviews: apologize for the bad experience, acknowledge the issue, and mention that feedback is being considered.
 6. Do NOT promise specific features or timelines.
-7. Keep the reply under ${charLimit} characters (this is a hard platform limit).
+7. Keep the reply short (${charLimit} characters is a hard platform limit, but try to keep it as short as possible).
 8. Do NOT include any greeting like "Dear user" - be concise and direct.
 
 OUTPUT FORMAT:

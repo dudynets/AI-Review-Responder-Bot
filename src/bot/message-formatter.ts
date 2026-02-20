@@ -6,11 +6,15 @@ function renderStars(rating: number): string {
   return '⭐'.repeat(rating);
 }
 
-function escapeHtml(text: string): string {
+export function escapeMarkdownV2(text: string): string {
+  return text.replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g, '\\$1');
+}
+
+function blockquote(text: string): string {
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .split('\n')
+    .map((line) => `>${line}`)
+    .join('\n');
 }
 
 function platformLabel(platform: string): string {
@@ -19,81 +23,80 @@ function platformLabel(platform: string): string {
   return 'App Store';
 }
 
-export function formatReviewMessage(review: ReviewRow): string {
+type MessageStatus = 'pending' | 'replied' | 'skipped';
+
+function formatMessage(review: ReviewRow, status: MessageStatus): string {
   const stars = renderStars(review.starRating);
   const pLabel = platformLabel(review.platform);
+  const e = escapeMarkdownV2;
 
   let msg = '';
-  msg += `<b>${pLabel} | ${stars} (${review.starRating}/5)</b>\n`;
-  msg += `<b>App:</b> ${escapeHtml(review.appName)}\n`;
-  msg += `<b>By:</b> ${escapeHtml(review.authorName ?? 'Anonymous')}\n`;
-  msg += `\n`;
+  msg += `*${e(`${pLabel} | ${stars} (${review.starRating}/5)`)}*\n`;
+  msg += `*App:* ${e(review.appName)}\n`;
+  msg += `*By:* ${e(review.authorName ?? 'Anonymous')}\n`;
 
-  msg += `<b>Review:</b>\n`;
-  msg += `<i>${escapeHtml(review.originalText)}</i>\n`;
+  msg += `\n*Review:*\n`;
+  msg += `${blockquote(e(review.originalText.trim()))}\n`;
 
   if (review.translatedText) {
-    msg += `\n<b>Review in ${preferredLanguageName}:</b>\n`;
-    msg += `<i>${escapeHtml(review.translatedText)}</i>\n`;
+    msg += `\n\n*${e(`Review in ${preferredLanguageName}:`)}*\n`;
+    msg += `${blockquote(e((review.translatedText ?? '').trim()))}\n`;
   }
 
-  if (review.generatedReply) {
-    msg += `\n${'-'.repeat(3)}\n\n`;
-    msg += `<b>Reply:</b>\n`;
-    msg += `<i>${escapeHtml(review.generatedReply)}</i>\n`;
+  if (status === 'replied' || review.generatedReply) {
+    msg += `\n\n*Reply:*\n`;
+    msg += `${blockquote(e((review.generatedReply ?? '').trim()))}\n`;
 
     if (
       review.replyTranslated &&
       review.replyTranslated !== review.generatedReply
     ) {
-      msg += `\n<b>Reply in ${preferredLanguageName}:</b>\n`;
-      msg += `<i>${escapeHtml(review.replyTranslated)}</i>\n`;
+      msg += `\n\n*${e(`Reply in ${preferredLanguageName}:`)}*\n`;
+      msg += `${blockquote(e((review.replyTranslated ?? '').trim()))}\n`;
     }
   }
 
-  msg += `\nReply to this message with comments to adjust the reply.`;
+  switch (status) {
+    case 'replied':
+      msg += `\n\n${e('✅ Reply sent successfully!')}`;
+      break;
+    case 'skipped':
+      msg += `\n\n${e('❌ Skipped')}`;
+      break;
+    default:
+      msg += `\n\n${e('Reply to this message with comments to adjust the reply.')}`;
+      break;
+  }
 
   return msg;
+}
+
+export function formatReviewMessage(review: ReviewRow): string {
+  return formatMessage(review, 'pending');
 }
 
 export function formatRepliedMessage(review: ReviewRow): string {
-  const stars = renderStars(review.starRating);
-  const pLabel = platformLabel(review.platform);
-
-  let msg = '';
-  msg += `<b>${pLabel} | ${stars} (${review.starRating}/5)</b>\n`;
-  msg += `<b>App:</b> ${escapeHtml(review.appName)}\n`;
-  msg += `<b>By:</b> ${escapeHtml(review.authorName ?? 'Anonymous')}\n`;
-  msg += `\n`;
-
-  msg += `<b>Review:</b>\n`;
-  msg += `<i>${escapeHtml(review.originalText)}</i>\n`;
-
-  if (review.translatedText) {
-    msg += `\n<b>Review in ${preferredLanguageName}:</b>\n`;
-    msg += `<i>${escapeHtml(review.translatedText)}</i>\n`;
-  }
-
-  msg += `\n${'-'.repeat(3)}\n\n`;
-
-  msg += `<b>Reply:</b>\n`;
-  msg += `<i>${escapeHtml(review.generatedReply ?? '')}</i>\n`;
-
-  if (
-    review.replyTranslated &&
-    review.replyTranslated !== review.generatedReply
-  ) {
-    msg += `\n<b>Reply in ${preferredLanguageName}:</b>\n`;
-    msg += `<i>${escapeHtml(review.replyTranslated ?? '')}</i>\n`;
-  }
-
-  msg += `\n✅ Reply sent successfully!`;
-
-  return msg;
+  return formatMessage(review, 'replied');
 }
 
-export function buildReviewKeyboard(reviewDbId: string): InlineKeyboard {
+export function formatSkippedMessage(review: ReviewRow): string {
+  return formatMessage(review, 'skipped');
+}
+
+export function buildReviewKeyboard(reviewDbId: number): InlineKeyboard {
   return new InlineKeyboard()
-    .text('✅ Send Reply', `reply:${reviewDbId}`)
-    .text('❌ Skip', `skip:${reviewDbId}`);
+    .text(
+      {
+        text: 'Skip',
+        style: 'danger',
+      },
+      `skip:${reviewDbId}`,
+    )
+    .text(
+      {
+        text: 'Send Reply',
+        style: 'success',
+      },
+      `reply:${reviewDbId}`,
+    );
 }

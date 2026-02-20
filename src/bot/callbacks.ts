@@ -5,7 +5,10 @@ import {
   markReviewReplied,
   markReviewSkipped,
 } from '../db/review.repository.js';
-import {formatRepliedMessage} from './message-formatter.js';
+import {
+  formatRepliedMessage,
+  formatSkippedMessage,
+} from './message-formatter.js';
 import {GooglePlayAdapter} from '../platforms/google-play.adapter.js';
 import {AppStoreAdapter} from '../platforms/app-store.adapter.js';
 import {MockAdapter} from '../platforms/mock.adapter.js';
@@ -19,8 +22,8 @@ const adapters: Record<Platform, PlatformAdapter> = {
 };
 
 export function registerCallbacks(bot: Bot): void {
-  bot.callbackQuery(/^reply:(.+)$/, async (ctx: Context) => {
-    const reviewDbId = ctx.match?.[1];
+  bot.callbackQuery(/^reply:(\d+)$/, async (ctx: Context) => {
+    const reviewDbId = Number(ctx.match?.[1]);
     if (!reviewDbId) return;
 
     try {
@@ -59,7 +62,7 @@ export function registerCallbacks(bot: Bot): void {
       if (updatedReview) {
         const newText = formatRepliedMessage(updatedReview);
         await ctx.editMessageText(newText, {
-          parse_mode: 'HTML',
+          parse_mode: 'MarkdownV2',
           reply_markup: undefined,
         });
       }
@@ -78,8 +81,8 @@ export function registerCallbacks(bot: Bot): void {
     }
   });
 
-  bot.callbackQuery(/^skip:(.+)$/, async (ctx: Context) => {
-    const reviewDbId = ctx.match?.[1];
+  bot.callbackQuery(/^skip:(\d+)$/, async (ctx: Context) => {
+    const reviewDbId = Number(ctx.match?.[1]);
     if (!reviewDbId) return;
 
     try {
@@ -91,12 +94,14 @@ export function registerCallbacks(bot: Bot): void {
 
       markReviewSkipped(reviewDbId);
 
-      await ctx.editMessageText(
-        ctx.callbackQuery?.message?.text
-          ? ctx.callbackQuery.message.text + '\n\n❌ Skipped'
-          : '❌ Skipped',
-        {reply_markup: undefined},
-      );
+      const updatedReview = findReviewById(reviewDbId);
+      if (updatedReview) {
+        const newText = formatSkippedMessage(updatedReview);
+        await ctx.editMessageText(newText, {
+          parse_mode: 'MarkdownV2',
+          reply_markup: undefined,
+        });
+      }
 
       await ctx.answerCallbackQuery({text: 'Review skipped'});
     } catch (error) {

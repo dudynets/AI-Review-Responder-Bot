@@ -62,7 +62,7 @@ export function registerReplyHandler(bot: Bot): void {
       const keyboard = buildReviewKeyboard(review.id);
 
       await ctx.api.editMessageText(chatId, replyTo.message_id, newText, {
-        parse_mode: 'HTML',
+        parse_mode: 'MarkdownV2',
         reply_markup: keyboard,
       });
 

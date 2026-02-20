@@ -1,8 +1,9 @@
 import {sqliteTable, text, integer} from 'drizzle-orm/sqlite-core';
 
 export const reviews = sqliteTable('reviews', {
-  /** Composite key: "{platform}:{appId}:{reviewId}" */
-  id: text('id').primaryKey(),
+  id: integer('id').primaryKey({autoIncrement: true}),
+  /** Composite key: "{platform}:{appId}:{reviewId}" – used for dedup. */
+  compositeKey: text('composite_key').notNull().unique(),
   platform: text('platform').notNull(),
   appId: text('app_id').notNull(),
   appName: text('app_name').notNull(),
